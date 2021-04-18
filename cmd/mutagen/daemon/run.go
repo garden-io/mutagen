@@ -27,6 +27,7 @@ import (
 	_ "github.com/mutagen-io/mutagen/pkg/forwarding/protocols/local"
 	_ "github.com/mutagen-io/mutagen/pkg/forwarding/protocols/ssh"
 	_ "github.com/mutagen-io/mutagen/pkg/synchronization/protocols/docker"
+	_ "github.com/mutagen-io/mutagen/pkg/synchronization/protocols/exec"
 	_ "github.com/mutagen-io/mutagen/pkg/synchronization/protocols/local"
 	_ "github.com/mutagen-io/mutagen/pkg/synchronization/protocols/ssh"
 )

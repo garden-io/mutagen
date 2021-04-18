@@ -26,6 +26,8 @@ func Parse(raw string, kind Kind, first bool) (*URL, error) {
 	// If we don't match anything, we assume the URL is a local path.
 	if isDockerURL(raw) {
 		return parseDocker(raw, kind, first)
+	} else if isExecURL(raw) {
+		return parseExec(raw, kind)
 	} else if isSCPSSHURL(raw, kind) {
 		return parseSCPSSH(raw, kind)
 	} else {
