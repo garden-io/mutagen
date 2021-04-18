@@ -110,7 +110,7 @@ func listMain(_ *cobra.Command, _ []string) error {
 
 	// List forwarding sessions.
 	fmt.Println("Forwarding sessions:")
-	if err := forward.ListWithSelection(daemonConnection, selection, listConfiguration.long); err != nil {
+	if err := forward.ListWithSelection(daemonConnection, selection, listConfiguration.long, ""); err != nil {
 		return fmt.Errorf("unable to list forwarding session(s): %w", err)
 	}
 
@@ -119,7 +119,7 @@ func listMain(_ *cobra.Command, _ []string) error {
 
 	// List synchronization sessions.
 	fmt.Println("Synchronization sessions:")
-	if err := sync.ListWithSelection(daemonConnection, selection, listConfiguration.long); err != nil {
+	if err := sync.ListWithSelection(daemonConnection, selection, listConfiguration.long, ""); err != nil {
 		return fmt.Errorf("unable to list synchronization session(s): %w", err)
 	}
 
