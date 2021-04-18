@@ -26,13 +26,13 @@ func listSessions(project *compose.Project) error {
 
 	// Perform forwarding session listing.
 	fmt.Println("\nForwarding sessions")
-	if err := forward.ListWithSelection(daemonConnection, projectSelection, false); err != nil {
+	if err := forward.ListWithSelection(daemonConnection, projectSelection, false, ""); err != nil {
 		return fmt.Errorf("forwarding listing failed: %w", err)
 	}
 
 	// Perform synchronization session listing.
 	fmt.Println("\nSynchronization sessions")
-	if err := sync.ListWithSelection(daemonConnection, projectSelection, false); err != nil {
+	if err := sync.ListWithSelection(daemonConnection, projectSelection, false, ""); err != nil {
 		return fmt.Errorf("synchronization listing failed: %w", err)
 	}
 

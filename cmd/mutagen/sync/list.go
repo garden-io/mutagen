@@ -2,6 +2,7 @@ package sync
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/pkg/errors"
@@ -157,6 +158,10 @@ func printConflicts(conflicts []*core.Conflict, excludedConflicts uint64) {
 	}
 }
 
+type JSONListOutput struct {
+	Sessions []*synchronization.State `json:"sessions"`
+}
+
 // ListWithSelection is an orchestration convenience method that performs a list
 // operation using the provided daemon connection and session selection and then
 // prints status information.
@@ -164,6 +169,7 @@ func ListWithSelection(
 	daemonConnection *grpc.ClientConn,
 	selection *selection.Selection,
 	long bool,
+	outputFormat string,
 ) error {
 	// Perform the list operation.
 	synchronizationService := synchronizationsvc.NewSynchronizationClient(daemonConnection)
@@ -177,31 +183,48 @@ func ListWithSelection(
 		return errors.Wrap(err, "invalid list response received")
 	}
 
-	// Handle output based on whether or not any sessions were returned.
-	if len(response.SessionStates) > 0 {
-		for _, state := range response.SessionStates {
-			fmt.Println(cmd.DelimiterLine)
-			printSession(state, long)
-			printEndpointStatus(
-				"Alpha", state.Session.Alpha, state.AlphaConnected,
-				state.AlphaScanProblems, state.ExcludedAlphaScanProblems,
-				state.AlphaTransitionProblems, state.ExcludedAlphaTransitionProblems,
-			)
-			printEndpointStatus(
-				"Beta", state.Session.Beta, state.BetaConnected,
-				state.BetaScanProblems, state.ExcludedBetaScanProblems,
-				state.BetaTransitionProblems, state.ExcludedBetaTransitionProblems,
-			)
-			printSessionStatus(state)
-			if len(state.Conflicts) > 0 {
-				printConflicts(state.Conflicts, state.ExcludedConflicts)
+	// Perform the list operation and print status information.
+	if (outputFormat == "") {
+		// Handle output based on whether or not any sessions were returned.
+		if len(response.SessionStates) > 0 {
+			for _, state := range response.SessionStates {
+				fmt.Println(cmd.DelimiterLine)
+				printSession(state, long)
+				printEndpointStatus(
+					"Alpha", state.Session.Alpha, state.AlphaConnected,
+					state.AlphaScanProblems, state.ExcludedAlphaScanProblems,
+					state.AlphaTransitionProblems, state.ExcludedAlphaTransitionProblems,
+				)
+				printEndpointStatus(
+					"Beta", state.Session.Beta, state.BetaConnected,
+					state.BetaScanProblems, state.ExcludedBetaScanProblems,
+					state.BetaTransitionProblems, state.ExcludedBetaTransitionProblems,
+				)
+				printSessionStatus(state)
+				if len(state.Conflicts) > 0 {
+					printConflicts(state.Conflicts, state.ExcludedConflicts)
+				}
 			}
+			fmt.Println(cmd.DelimiterLine)
+		} else {
+			fmt.Println(cmd.DelimiterLine)
+			fmt.Println("No synchronization sessions found")
+			fmt.Println(cmd.DelimiterLine)
 		}
-		fmt.Println(cmd.DelimiterLine)
+	} else if (outputFormat == "json") {
+		// Don't encode an empty list as null
+		sessions := response.SessionStates
+		if sessions == nil {
+			sessions = make([]*synchronization.State, 0)
+		}
+
+		b, err := json.MarshalIndent(JSONListOutput{sessions}, "", "  ")
+		if err != nil {
+			return errors.Wrap(nil, "unable to encode session states as JSON")
+		}
+		fmt.Println(string(b))
 	} else {
-		fmt.Println(cmd.DelimiterLine)
-		fmt.Println("No synchronization sessions found")
-		fmt.Println(cmd.DelimiterLine)
+		return errors.Wrap(err, fmt.Sprintf("unexpected output format '%s'", outputFormat))
 	}
 
 	// Success.
@@ -227,8 +250,7 @@ func listMain(_ *cobra.Command, arguments []string) error {
 	}
 	defer daemonConnection.Close()
 
-	// Perform the list operation and print status information.
-	return ListWithSelection(daemonConnection, selection, listConfiguration.long)
+	return ListWithSelection(daemonConnection, selection, listConfiguration.long, listConfiguration.output)
 }
 
 // listCommand is the list command.
@@ -248,6 +270,8 @@ var listConfiguration struct {
 	// labelSelector encodes a label selector to be used in identifying which
 	// sessions should be paused.
 	labelSelector string
+	// output allows specifying a format for the list output
+	output string
 }
 
 func init() {
@@ -264,4 +288,5 @@ func init() {
 	// Wire up list flags.
 	flags.BoolVarP(&listConfiguration.long, "long", "l", false, "Show detailed session information")
 	flags.StringVar(&listConfiguration.labelSelector, "label-selector", "", "List sessions matching the specified label selector")
+	flags.StringVarP(&listConfiguration.output, "output", "o", "", "Set to json to output the list in JSON format")
 }
