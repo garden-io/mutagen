@@ -528,6 +528,78 @@ func TestParseSCPSSHUnicodeUsernameHostnamePortPath(t *testing.T) {
 	test.run(t)
 }
 
+func TestParseExec(t *testing.T) {
+	test := parseTestCase{
+		raw: "exec:my-command",
+		expected: &URL{
+			Protocol: Protocol_Exec,
+			Host:     "my-command",
+			Path:     "",
+		},
+	}
+	test.run(t)
+}
+
+func TestParseExecWithSpaces(t *testing.T) {
+	test := parseTestCase{
+		raw: "exec:'my-command and some args'",
+		expected: &URL{
+			Protocol: Protocol_Exec,
+			Host:     "my-command and some args",
+			Path:     "",
+		},
+	}
+	test.run(t)
+}
+
+func TestParseExecWithSpacesDoubleQuote(t *testing.T) {
+	test := parseTestCase{
+		raw: "exec:\"my-command and some args\"",
+		expected: &URL{
+			Protocol: Protocol_Exec,
+			Host:     "my-command and some args",
+			Path:     "",
+		},
+	}
+	test.run(t)
+}
+
+func TestParseExecWithPath(t *testing.T) {
+	test := parseTestCase{
+		raw: "exec:mutagen-agent:/some/path",
+		expected: &URL{
+			Protocol: Protocol_Exec,
+			Host:     "mutagen-agent",
+			Path:     "/some/path",
+		},
+	}
+	test.run(t)
+}
+
+func TestParseExecWithQuotedCommandAndPath(t *testing.T) {
+	test := parseTestCase{
+		raw: "exec:'some elaborate command':target/path",
+		expected: &URL{
+			Protocol: Protocol_Exec,
+			Host:     "some elaborate command",
+			Path:     "target/path",
+		},
+	}
+	test.run(t)
+}
+
+func TestParseExecWithColon(t *testing.T) {
+	test := parseTestCase{
+		raw: "exec:'my-command opt:value'",
+		expected: &URL{
+			Protocol: Protocol_Exec,
+			Host:     "my-command opt:value",
+			Path:     "",
+		},
+	}
+	test.run(t)
+}
+
 func TestParseForwardingDockerWithSourceSpecificVariables(t *testing.T) {
 	test := parseTestCase{
 		raw:   "docker://cøntainer:unix:/some/socket.sock",
