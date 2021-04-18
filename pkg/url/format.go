@@ -12,6 +12,8 @@ func (u *URL) Format(environmentPrefix string) string {
 		return u.formatSSH()
 	} else if u.Protocol == Protocol_Docker {
 		return u.formatDocker(environmentPrefix)
+	} else if u.Protocol == Protocol_Exec {
+		return u.formatExec()
 	}
 	panic("unknown URL protocol")
 }
@@ -102,5 +104,16 @@ func (u *URL) formatDocker(environmentPrefix string) string {
 	}
 
 	// Done.
+	return result
+}
+
+// formatExec formats an Exec URL
+func (u *URL) formatExec() string {
+	result := fmt.Sprintf("exec:'%s'", u.Host)
+
+	if u.Path != "" {
+		result = fmt.Sprintf("%s:%s", result, u.Path)
+	}
+
 	return result
 }
