@@ -1,3 +1,7 @@
+# IDEs
+.vscode
+.history
+
 # Build output
 /build/
 
