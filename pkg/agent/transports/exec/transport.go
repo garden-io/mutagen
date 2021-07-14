@@ -8,33 +8,34 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/mutagen-io/mutagen/pkg/agent"
+	"github.com/mutagen-io/mutagen/pkg/agent/transport"
 	"github.com/mutagen-io/mutagen/pkg/process"
 )
 
 // transport implements the agent.Transport interface using SSH.
-type transport struct {
+type execTransport struct {
 	// host is the target host.
 	command string
 	// prompter is the prompter identifier to use for prompting.
 	prompter string
 }
 
-// NewTransport creates a new SSH transport using the specified parameters.
+// NewTransport creates a new exec transport using the specified parameters.
 func NewTransport(command string, prompter string) (agent.Transport, error) {
-	return &transport{
+	return &execTransport{
 		command:   command,
 		prompter:  prompter,
 	}, nil
 }
 
 // Copy implements the Copy method of agent.Transport.
-func (t *transport) Copy(localPath, remoteName string) error {
+func (t *execTransport) Copy(localPath, remoteName string) error {
 	// This is a no-op. We instead expect the Command handler to start with
 	return nil
 }
 
 // Command implements the Command method of agent.Transport.
-func (t *transport) Command(command string) (*osExec.Cmd, error) {
+func (t *execTransport) Command(command string) (*osExec.Cmd, error) {
 	if (strings.Contains(command, agent.BaseName)) {
 		// This is a little hacky, but we need to override the given command with the one specified in the exec:<command>
 		// URL when calling the mutagen-agent
@@ -56,7 +57,7 @@ func (t *transport) Command(command string) (*osExec.Cmd, error) {
 	execCommand := osExec.Command(name, args...)
 
 	// Force it to run detached.
-	execCommand.SysProcAttr = process.DetachedProcessAttributes()
+	execCommand.SysProcAttr = transport.ProcessAttributes()
 
 	// Create a copy of the current environment.
 	environment := os.Environ()
@@ -73,7 +74,7 @@ func (t *transport) Command(command string) (*osExec.Cmd, error) {
 }
 
 // ClassifyError implements the ClassifyError method of agent.Transport.
-func (t *transport) ClassifyError(processState *os.ProcessState, errorOutput string) (bool, bool, error) {
+func (t *execTransport) ClassifyError(processState *os.ProcessState, errorOutput string) (bool, bool, error) {
 	// Note: We always return false for the tryInstall value, since installation should never be attempted.
 
 	if process.IsPOSIXShellInvalidCommand(processState) {
