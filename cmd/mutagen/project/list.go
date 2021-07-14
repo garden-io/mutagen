@@ -14,6 +14,7 @@ import (
 	"github.com/mutagen-io/mutagen/cmd"
 	"github.com/mutagen-io/mutagen/cmd/mutagen/daemon"
 	"github.com/mutagen-io/mutagen/cmd/mutagen/forward"
+	"github.com/mutagen-io/mutagen/cmd/mutagen/root"
 	"github.com/mutagen-io/mutagen/cmd/mutagen/sync"
 
 	"github.com/mutagen-io/mutagen/pkg/filesystem/locking"
@@ -98,7 +99,8 @@ func listMain(_ *cobra.Command, _ []string) error {
 	}
 
 	// Connect to the daemon and defer closure of the connection.
-	daemonConnection, err := daemon.Connect(true, true)
+	autoStart, _ := root.RootCommand.Flags().GetBool("auto-start")
+	daemonConnection, err := daemon.Connect(autoStart, true)
 	if err != nil {
 		return errors.Wrap(err, "unable to connect to daemon")
 	}

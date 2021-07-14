@@ -7,6 +7,7 @@ import (
 
 	"github.com/mutagen-io/mutagen/cmd"
 	"github.com/mutagen-io/mutagen/cmd/mutagen/compose"
+	"github.com/mutagen-io/mutagen/cmd/mutagen/root"
 )
 
 // generateMain is the entry point for the generate command.
@@ -14,33 +15,33 @@ func generateMain(_ *cobra.Command, _ []string) error {
 	// HACK: Remove the adapter command that we use to keep the Docker Compose
 	// command hierarchy separate and replace it with the actual Docker Compose
 	// command hierarchy for the purposes of completion script generation.
-	rootCommand.RemoveCommand(compose.RootCommand)
-	rootCommand.AddCommand(compose.ComposeCommand)
+	root.RootCommand.RemoveCommand(compose.RootCommand)
+	root.RootCommand.AddCommand(compose.ComposeCommand)
 
 	// Generate a Bash completion script, if requested.
 	if generateConfiguration.bashCompletionScript != "" {
-		if err := rootCommand.GenBashCompletionFile(generateConfiguration.bashCompletionScript); err != nil {
+		if err := root.RootCommand.GenBashCompletionFile(generateConfiguration.bashCompletionScript); err != nil {
 			return fmt.Errorf("unable to generate Bash completion script: %w", err)
 		}
 	}
 
 	// Generate a fish completion script, if requested.
 	if generateConfiguration.fishCompletionScript != "" {
-		if err := rootCommand.GenFishCompletionFile(generateConfiguration.fishCompletionScript, true); err != nil {
+		if err := root.RootCommand.GenFishCompletionFile(generateConfiguration.fishCompletionScript, true); err != nil {
 			return fmt.Errorf("unable to generate fish completion script: %w", err)
 		}
 	}
 
 	// Generate a PowerShell completion script, if requested.
 	if generateConfiguration.powerShellCompletionScript != "" {
-		if err := rootCommand.GenPowerShellCompletionFile(generateConfiguration.powerShellCompletionScript); err != nil {
+		if err := root.RootCommand.GenPowerShellCompletionFile(generateConfiguration.powerShellCompletionScript); err != nil {
 			return fmt.Errorf("unable to generate PowerShell completion script: %w", err)
 		}
 	}
 
 	// Generate a Zsh completion script, if requested.
 	if generateConfiguration.zshCompletionScript != "" {
-		if err := rootCommand.GenZshCompletionFile(generateConfiguration.zshCompletionScript); err != nil {
+		if err := root.RootCommand.GenZshCompletionFile(generateConfiguration.zshCompletionScript); err != nil {
 			return fmt.Errorf("unable to generate Zsh completion script: %w", err)
 		}
 	}

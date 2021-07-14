@@ -11,6 +11,7 @@ import (
 
 	"github.com/mutagen-io/mutagen/cmd/mutagen/daemon"
 	"github.com/mutagen-io/mutagen/cmd/mutagen/forward"
+	"github.com/mutagen-io/mutagen/cmd/mutagen/root"
 	"github.com/mutagen-io/mutagen/cmd/mutagen/sync"
 
 	"github.com/mutagen-io/mutagen/pkg/compose"
@@ -98,7 +99,8 @@ func synchronizationSessionCurrent(
 // reconcileSessions handles Mutagen session reconciliation for the project.
 func reconcileSessions(project *compose.Project) error {
 	// Connect to the Mutagen daemon and defer closure of the connection.
-	daemonConnection, err := daemon.Connect(true, true)
+	autoStart, _ := root.RootCommand.Flags().GetBool("auto-start")
+	daemonConnection, err := daemon.Connect(autoStart, true)
 	if err != nil {
 		return fmt.Errorf("unable to connect to Mutagen daemon: %w", err)
 	}
