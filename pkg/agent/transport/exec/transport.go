@@ -22,8 +22,8 @@ type execTransport struct {
 // NewTransport creates a new exec transport using the specified parameters.
 func NewTransport(command string, prompter string) (agent.Transport, error) {
 	return &execTransport{
-		command:   command,
-		prompter:  prompter,
+		command:  command,
+		prompter: prompter,
 	}, nil
 }
 
@@ -36,7 +36,7 @@ func (t *execTransport) Copy(localPath, remoteName string) error {
 
 // Command implements the Command method of agent.Transport.
 func (t *execTransport) Command(command string) (*osExec.Cmd, error) {
-	if (strings.Contains(command, agent.BaseName)) {
+	if strings.Contains(command, agent.BaseName) {
 		// This is a little hacky, but we need to override the given command with the one specified in the exec:<command>
 		// URL when calling the mutagen-agent
 		command = t.command
