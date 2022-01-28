@@ -218,11 +218,11 @@ func ListWithSelection(
 
 		b, err := json.MarshalIndent(JSONListOutput{sessions}, "", "  ")
 		if err != nil {
-			return errors.Wrap(nil, "unable to encode session states as JSON")
+			return fmt.Errorf("unable to encode session states as JSON: %w", err)
 		}
 		fmt.Println(string(b))
 	} else {
-		return errors.Wrap(err, fmt.Sprintf("unexpected output format '%s'", outputFormat))
+		return fmt.Errorf("unexpected output format '%s'", outputFormat)
 	}
 
 	// Success.

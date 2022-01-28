@@ -1,11 +1,10 @@
 package exec
 
 import (
+	"errors"
 	"os"
 	osExec "os/exec"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	"github.com/mutagen-io/mutagen/pkg/agent"
 	"github.com/mutagen-io/mutagen/pkg/agent/transport"
