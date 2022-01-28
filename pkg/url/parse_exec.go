@@ -42,8 +42,8 @@ func parseExec(raw string, kind Kind) (*URL, error) {
 		command = split[0]
 
 		// Strip quotes off command
-		if len(command) >= 2 && ((command[0] == '\'' && command[len(command) - 1] == '\'') || (command[0] == '"' && command[len(command) - 1] == '"')) {
-			command = command[1:len(command) - 1]
+		if len(command) >= 2 && ((command[0] == '\'' && command[len(command)-1] == '\'') || (command[0] == '"' && command[len(command)-1] == '"')) {
+			command = command[1 : len(command)-1]
 		}
 
 		// Set path, if provided
@@ -54,9 +54,9 @@ func parseExec(raw string, kind Kind) (*URL, error) {
 
 	// We return the command as the host
 	return &URL{
-		Kind:        kind,
-		Protocol:    Protocol_Exec,
-		Host:        command,
-		Path:        path,
+		Kind:     kind,
+		Protocol: Protocol_Exec,
+		Host:     command,
+		Path:     path,
 	}, nil
 }

@@ -59,7 +59,7 @@ func (u *URL) EnsureValid() error {
 		} else if len(u.Environment) != 0 {
 			return errors.New("TCP URL with environment variables")
 		}
-		} else {
+	} else {
 		return errors.New("unknown or unsupported protocol")
 	}
 
