@@ -11,7 +11,7 @@ import (
 	"github.com/mutagen-io/mutagen/pkg/process"
 )
 
-// transport implements the agent.Transport interface using SSH.
+// execTransport implements the agent.Transport interface using a shell command.
 type execTransport struct {
 	// host is the target host.
 	command string
@@ -29,7 +29,8 @@ func NewTransport(command string, prompter string) (agent.Transport, error) {
 
 // Copy implements the Copy method of agent.Transport.
 func (t *execTransport) Copy(localPath, remoteName string) error {
-	// This is a no-op. We instead expect the Command handler to start with
+	// This is a no-op. In this custom implementation, we expect the agent to be
+	// pre-installed on the remote.
 	return nil
 }
 
