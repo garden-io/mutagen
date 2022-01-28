@@ -1,9 +1,8 @@
 package url
 
 import (
+	"errors"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 // execURLPrefix is the lowercase version of the Docker URL prefix.
