@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	osExec "os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/mutagen-io/mutagen/pkg/agent"
@@ -40,10 +41,33 @@ func (t *execTransport) Command(command string) (*osExec.Cmd, error) {
 		// This is a little hacky, but we need to override the given command with the one specified in the exec:<command>
 		// URL when calling the mutagen-agent
 		command = t.command
+	} else {
+		// Since this transport only works on the primary agent dialing path, we
+		// disallow all other commands.
+		return nil, errors.New("transport does not support this command")
 	}
 
-	// Compute the command and args. Note that we ignore the provided command argument!
-	split := strings.Split(command, " ")
+	// Compute the command and arguments. Note that we're ignoring the original
+	// command in this case for the one passed in via the exec URL. Unlike a
+	// standard Mutagen-issued command, we can't rely on the ability to lex the
+	// command by string splitting, because the prefix for kubectl can contain
+	// spaces (e.g. in a home directory name). Thus, we split off the kubectl
+	// target manually with some assumptions about how that command will be
+	// structured.
+	var split []string
+	var firstSplitIndicator string
+	if runtime.GOOS == "windows" {
+		firstSplitIndicator = "\\kubectl.exe "
+	} else {
+		firstSplitIndicator = "/kubectl "
+	}
+	if index := strings.Index(command, firstSplitIndicator); index >= 0 {
+		split = append(split, command[:index+len(firstSplitIndicator)-1])
+		remaining := command[index+len(firstSplitIndicator):]
+		split = append(split, strings.Split(remaining, " ")...)
+	} else {
+		return nil, errors.New("unable to identify kubectl invocation")
+	}
 	name := split[0]
 
 	var args []string
