@@ -85,24 +85,23 @@ func ListWithSelection(
 	}
 
 	// Perform the list operation and print status information.
-	if (outputFormat == "") {
+	if outputFormat == "" {
 		// Handle output based on whether or not any sessions were returned.
-	// Handle output based on whether or not any sessions were returned.
-	if len(response.SessionStates) > 0 {
-		for _, state := range response.SessionStates {
+		if len(response.SessionStates) > 0 {
+			for _, state := range response.SessionStates {
+				fmt.Println(cmd.DelimiterLine)
+				printSession(state, long)
+				printEndpointStatus("Source", state.Session.Source, state.SourceConnected)
+				printEndpointStatus("Destination", state.Session.Destination, state.DestinationConnected)
+				printSessionStatus(state)
+			}
 			fmt.Println(cmd.DelimiterLine)
-			printSession(state, long)
-			printEndpointStatus("Source", state.Session.Source, state.SourceConnected)
-			printEndpointStatus("Destination", state.Session.Destination, state.DestinationConnected)
-			printSessionStatus(state)
-		}
-		fmt.Println(cmd.DelimiterLine)
 		} else {
 			fmt.Println(cmd.DelimiterLine)
 			fmt.Println("No forwarding sessions found")
 			fmt.Println(cmd.DelimiterLine)
 		}
-	} else if (outputFormat == "json") {
+	} else if outputFormat == "json" {
 		// Don't encode an empty list as null
 		sessions := response.SessionStates
 		if sessions == nil {

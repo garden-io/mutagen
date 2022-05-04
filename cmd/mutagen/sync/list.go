@@ -181,7 +181,7 @@ func ListWithSelection(
 	}
 
 	// Perform the list operation and print status information.
-	if (outputFormat == "") {
+	if outputFormat == "" {
 		// Handle output based on whether or not any sessions were returned.
 		if len(response.SessionStates) > 0 {
 			for _, state := range response.SessionStates {
@@ -208,7 +208,7 @@ func ListWithSelection(
 			fmt.Println("No synchronization sessions found")
 			fmt.Println(cmd.DelimiterLine)
 		}
-	} else if (outputFormat == "json") {
+	} else if outputFormat == "json" {
 		// Don't encode an empty list as null
 		sessions := response.SessionStates
 		if sessions == nil {
