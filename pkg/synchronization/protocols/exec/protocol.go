@@ -66,7 +66,7 @@ func (h *protocolHandler) Connect(
 	// cancellation.
 	go func() {
 		// Perform the dialing operation.
-		stream, err := agent.Dial(logger, transport, agent.ModeSynchronizer, prompter)
+		stream, err := agent.Dial(logger, transport, agent.CommandSynchronizer, prompter)
 
 		// Transmit the result or, if cancelled, close the stream.
 		select {
@@ -91,7 +91,7 @@ func (h *protocolHandler) Connect(
 	}
 
 	// Create the endpoint client.
-	return remote.NewEndpoint(stream, url.Path, session, version, configuration, alpha)
+	return remote.NewEndpoint(logger, stream, url.Path, session, version, configuration, alpha)
 }
 
 func init() {
