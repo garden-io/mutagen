@@ -32,6 +32,8 @@ func (p Protocol) MarshalText() ([]byte, error) {
 		result = "ssh"
 	case Protocol_Docker:
 		result = "docker"
+	case Protocol_Exec:
+		result = "exec"
 	default:
 		result = "unknown"
 	}
@@ -51,6 +53,8 @@ func (p *Protocol) UnmarshalText(textBytes []byte) error {
 		*p = Protocol_SSH
 	case "docker":
 		*p = Protocol_Docker
+	case "exec":
+		*p = Protocol_Exec
 	default:
 		return fmt.Errorf("unknown protocol specification: %s", text)
 	}
