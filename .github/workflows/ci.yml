@@ -40,27 +40,7 @@ jobs:
       - run: scripts/ci/analyze.sh
       - run: scripts/ci/test.sh
       - run: scripts/ci/build.sh
-        env:
-          MACOS_CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
-          MACOS_CODESIGN_CERTIFICATE_AND_KEY: ${{ secrets.MACOS_CODESIGN_CERTIFICATE_AND_KEY }}
-          MACOS_CODESIGN_CERTIFICATE_AND_KEY_PASSWORD: ${{ secrets.MACOS_CODESIGN_CERTIFICATE_AND_KEY_PASSWORD }}
-      - run: scripts/ci/notarize.sh
-        if: github.ref_type == 'tag'
-        env:
-          MACOS_NOTARIZE_APPLE_ID: ${{ secrets.MACOS_NOTARIZE_APPLE_ID }}
-          MACOS_NOTARIZE_APP_SPECIFIC_PASSWORD: ${{ secrets.MACOS_NOTARIZE_APP_SPECIFIC_PASSWORD }}
-          MACOS_NOTARIZE_TEAM_ID: ${{ secrets.MACOS_NOTARIZE_TEAM_ID }}
       - run: scripts/ci/sha256sum.sh
-      - uses: crazy-max/ghaction-import-gpg@v3
-        id: import_gpg
-        if: github.ref_type == 'tag'
-        with:
-          gpg-private-key: ${{ secrets.GPG_SIGNING_KEY }}
-          passphrase: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
-      - run: scripts/ci/sha256sign.sh
-        if: github.ref_type == 'tag'
-        env:
-          SHA256_GPG_SIGNING_IDENTITY: ${{ steps.import_gpg.outputs.email }}
       - uses: actions/upload-artifact@v2
         with:
           name: bundles
@@ -104,57 +84,11 @@ jobs:
         shell: bash
       - run: scripts/ci/build.sh
         shell: bash
-  sidecar:
-    name: Sidecar
-    runs-on: ubuntu-latest
-    needs: [macos, linux, windows]
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
-        with:
-          go-version: '^1.18'
-      - uses: docker/setup-qemu-action@v1
-      - uses: docker/setup-buildx-action@v1
-      - uses: docker/login-action@v1
-        if: github.ref_type == 'tag'
-        with:
-          username: ${{ secrets.SIDECAR_DEPLOYMENT_USER }}
-          password: ${{ secrets.SIDECAR_DEPLOYMENT_TOKEN }}
-      - name: "Determine sidecar tag"
-        id: tag
-        run: echo ::set-output name=tag::$(go run scripts/ci/sidecar_tag.go)
-      - uses: docker/build-push-action@v2
-        with:
-          file: images/sidecar/linux/Dockerfile
-          target: standard
-          tags: ${{ steps.tag.outputs.tag }}
-          push: ${{ github.ref_type == 'tag' }}
-          platforms: |
-            linux/386
-            linux/amd64
-            linux/arm/v6
-            linux/arm/v7
-            linux/arm64/v8
-            linux/ppc64le
-      - uses: docker/build-push-action@v2
-        with:
-          file: images/sidecar/linux/Dockerfile
-          target: enhanced
-          tags: ${{ steps.tag.outputs.tag }}-enhanced
-          push: ${{ github.ref_type == 'tag' }}
-          platforms: |
-            linux/386
-            linux/amd64
-            linux/arm/v6
-            linux/arm/v7
-            linux/arm64/v8
-            linux/ppc64le
   release:
     name: Release
     runs-on: ubuntu-latest
     if: github.ref_type == 'tag'
-    needs: [macos, linux, windows, sidecar]
+    needs: [macos, linux, windows]
     timeout-minutes: 10
     steps:
       - uses: actions/download-artifact@v2

@@ -104,6 +104,12 @@ func (u *URL) EnsureValid() error {
 		} else if u.Port != 0 {
 			return errors.New("Docker URL with non-zero port")
 		}
+	} else if u.Protocol == Protocol_Exec {
+		if u.Path == "" {
+			return errors.New("Exec URL with no command")
+		} else if len(u.Environment) != 0 {
+			return errors.New("TCP URL with environment variables")
+		}
 	} else {
 		return errors.New("unknown or unsupported protocol")
 	}
